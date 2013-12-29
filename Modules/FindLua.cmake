@@ -44,7 +44,7 @@ find_program(LUA_EXECUTABLE lua)
 if(PC_LUA_VERSION)
     set(LUA_VERSION_STRING ${PC_LUA_VERSION})
 elseif(LUA_INCLUDE_DIR AND EXISTS "${LUA_INCLUDE_DIR}/lua.h")
-    file(STRINGS "${LUA_INCLUDE_DIR}/Lua.h" lua_version_str
+    file(STRINGS "${LUA_INCLUDE_DIR}/lua.h" lua_version_str
          REGEX "^#define[\t ]+LUA_RELEASE[\t ]+\".*\"")
 
     string(REGEX REPLACE "^#define[\t ]+LUA_RELEASE[\t ]+\"Lua ([^\"]*)\".*" "\\1"
