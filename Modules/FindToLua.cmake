@@ -56,7 +56,7 @@ endif()
 # all listed variables are TRUE
 include(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(ToLua
-                                  REQUIRED_VARS TOLUA_LIBRARIES TOLUA_INCLUDE_DIR
+                                  REQUIRED_VARS TOLUA_LIBRARIES TOLUA_INCLUDE_DIR TOLUA_EXECUTABLE
                                   VERSION_VAR TOLUA_VERSION_STRING)
 
 mark_as_advanced(TOLUA_INCLUDE_DIR TOLUA_LIBRARIES TOLUA_EXECUTABLE)
