@@ -1,16 +1,21 @@
-# - Try to find the Lua library
-# Once done this will define
+# Locate Lua library
+# This module defines
+#  LUA_EXECUTABLE, if found
+#  LUA_FOUND, if false, do not try to link to Lua 
+#  LUA_LIBRARIES
+#  LUA_INCLUDE_DIR, where to find lua.h
+#  LUA_VERSION_STRING, the version of Lua found (since CMake 2.8.8)
 #
-#  LUA_FOUND - System has Lua
-#  LUA_INCLUDE_DIR - The Lua include directory
-#  LUA_LIBRARIES - The libraries needed to use Lua
-#  LUA_DEFINITIONS - Compiler switches required for using Lua
-#  LUA_EXECUTABLE - The Lua command line shell
-#  LUA_VERSION_STRING - the version of Lua found (since CMake 2.8.8)
+# Note that the expected include convention is
+#  #include "lua.h"
+# and not
+#  #include <lua/lua.h>
+# This is because, the lua location is not standardized and may exist
+# in locations other than lua/
 
 #=============================================================================
-# Copyright 2006-2009 Kitware, Inc.
-# Copyright 2006 Alexander Neundorf <neundorf@kde.org>
+# Copyright 2007-2009 Kitware, Inc.
+# Modified to support Lua 5.2 by LuaDist 2012
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
@@ -21,42 +26,93 @@
 #=============================================================================
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
+#
+# The required version of Lua can be specified using the
+# standard syntax, e.g. FIND_PACKAGE(Lua 5.1)
+# Otherwise the module will search for any available Lua implementation
 
-# use pkg-config to get the directories and then use these values
-# in the find_path() and find_library() calls
-find_package(PkgConfig QUIET)
-PKG_CHECK_MODULES(PC_LUA QUIET Lua)
-set(LUA_DEFINITIONS ${PC_LUA_CFLAGS_OTHER})
+# Always search for non-versioned lua first (recommended)
+SET(_POSSIBLE_LUA_INCLUDE include include/lua)
+SET(_POSSIBLE_LUA_EXECUTABLE lua)
+SET(_POSSIBLE_LUA_LIBRARY lua)
 
-find_path(LUA_INCLUDE_DIR NAMES lua.h
-   HINTS
-   ${PC_LUA_INCLUDEDIR}
-   ${PC_LUA_INCLUDE_DIRS}
-   )
+# Determine possible naming suffixes (there is no standard for this)
+IF(Lua_FIND_VERSION_MAJOR AND Lua_FIND_VERSION_MINOR)
+  SET(_POSSIBLE_SUFFIXES "${Lua_FIND_VERSION_MAJOR}${Lua_FIND_VERSION_MINOR}" "${Lua_FIND_VERSION_MAJOR}.${Lua_FIND_VERSION_MINOR}" "-${Lua_FIND_VERSION_MAJOR}.${Lua_FIND_VERSION_MINOR}")
+ELSE(Lua_FIND_VERSION_MAJOR AND Lua_FIND_VERSION_MINOR)
+  SET(_POSSIBLE_SUFFIXES "52" "5.2" "-5.2" "51" "5.1" "-5.1")
+ENDIF(Lua_FIND_VERSION_MAJOR AND Lua_FIND_VERSION_MINOR)
 
-find_library(LUA_LIBRARIES NAMES lua lua5.2 lua52 lua5.1 lua51 lua5.0 lua50
-   HINTS
-   ${PC_LUA_LIBDIR}
-   ${PC_LUA_LIBRARY_DIRS}
-   )
-find_program(LUA_EXECUTABLE lua)
+# Set up possible search names and locations
+FOREACH(_SUFFIX ${_POSSIBLE_SUFFIXES})
+  LIST(APPEND _POSSIBLE_LUA_INCLUDE "include/lua${_SUFFIX}")
+  LIST(APPEND _POSSIBLE_LUA_EXECUTABLE "lua${_SUFFIX}")
+  LIST(APPEND _POSSIBLE_LUA_LIBRARY "lua${_SUFFIX}")
+ENDFOREACH(_SUFFIX)
 
-if(PC_LUA_VERSION)
-    set(LUA_VERSION_STRING ${PC_LUA_VERSION})
-elseif(LUA_INCLUDE_DIR AND EXISTS "${LUA_INCLUDE_DIR}/lua.h")
-    file(STRINGS "${LUA_INCLUDE_DIR}/lua.h" lua_version_str
-         REGEX "^#define[\t ]+LUA_RELEASE[\t ]+\".*\"")
+# Find the lua executable
+FIND_PROGRAM(LUA_EXECUTABLE
+  NAMES ${_POSSIBLE_LUA_EXECUTABLE}
+)
 
-    string(REGEX REPLACE "^#define[\t ]+LUA_RELEASE[\t ]+\"Lua ([^\"]*)\".*" "\\1"
-           LUA_VERSION_STRING "${lua_version_str}")
-    unset(lua_version_str)
-endif()
+# Find the lua header
+FIND_PATH(LUA_INCLUDE_DIR lua.h
+  HINTS
+  $ENV{LUA_DIR}
+  PATH_SUFFIXES ${_POSSIBLE_LUA_INCLUDE}
+  PATHS
+  ~/Library/Frameworks
+  /Library/Frameworks
+  /usr/local
+  /usr
+  /sw # Fink
+  /opt/local # DarwinPorts
+  /opt/csw # Blastwave
+  /opt
+)
 
-# handle the QUIETLY and REQUIRED arguments and set LUA_FOUND to TRUE if
+# Find the lua library
+FIND_LIBRARY(LUA_LIBRARY 
+  NAMES ${_POSSIBLE_LUA_LIBRARY}
+  HINTS
+  $ENV{LUA_DIR}
+  PATH_SUFFIXES lib64 lib
+  PATHS
+  ~/Library/Frameworks
+  /Library/Frameworks
+  /usr/local
+  /usr
+  /sw
+  /opt/local
+  /opt/csw
+  /opt
+)
+
+IF(LUA_LIBRARY)
+  # include the math library for Unix
+  IF(UNIX AND NOT APPLE)
+    FIND_LIBRARY(LUA_MATH_LIBRARY m)
+    SET( LUA_LIBRARIES "${LUA_LIBRARY};${LUA_MATH_LIBRARY}" CACHE STRING "Lua Libraries")
+  # For Windows and Mac, don't need to explicitly include the math library
+  ELSE(UNIX AND NOT APPLE)
+    SET( LUA_LIBRARIES "${LUA_LIBRARY}" CACHE STRING "Lua Libraries")
+  ENDIF(UNIX AND NOT APPLE)
+ENDIF(LUA_LIBRARY)
+
+# Determine Lua version
+IF(LUA_INCLUDE_DIR AND EXISTS "${LUA_INCLUDE_DIR}/lua.h")
+  FILE(STRINGS "${LUA_INCLUDE_DIR}/lua.h" lua_version_str REGEX "^#define[ \t]+LUA_RELEASE[ \t]+\"Lua .+\"")
+
+  STRING(REGEX REPLACE "^#define[ \t]+LUA_RELEASE[ \t]+\"Lua ([^\"]+)\".*" "\\1" LUA_VERSION_STRING "${lua_version_str}")
+  UNSET(lua_version_str)
+ENDIF()
+
+INCLUDE(FindPackageHandleStandardArgs)
+# handle the QUIETLY and REQUIRED arguments and set LUA_FOUND to TRUE if 
 # all listed variables are TRUE
-include(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(Lua
                                   REQUIRED_VARS LUA_LIBRARIES LUA_INCLUDE_DIR
                                   VERSION_VAR LUA_VERSION_STRING)
 
-mark_as_advanced(LUA_INCLUDE_DIR LUA_LIBRARIES LUA_EXECUTABLE)
+MARK_AS_ADVANCED(LUA_INCLUDE_DIR LUA_LIBRARIES LUA_LIBRARY LUA_MATH_LIBRARY LUA_EXECUTABLE)
+
