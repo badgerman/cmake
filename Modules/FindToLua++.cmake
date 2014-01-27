@@ -55,7 +55,7 @@ endif()
 # handle the QUIETLY and REQUIRED arguments and set TOLUA++_FOUND to TRUE if
 # all listed variables are TRUE
 include(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(ToLua
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(ToLua++
                                   REQUIRED_VARS TOLUA++_LIBRARIES TOLUA++_INCLUDE_DIR TOLUA++_EXECUTABLE
                                   VERSION_VAR TOLUA++_VERSION_STRING)
 
