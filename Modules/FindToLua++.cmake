@@ -44,7 +44,7 @@ find_program(TOLUA++_EXECUTABLE tolua++)
 if(PC_TOLUA++_VERSION)
     set(TOLUA++_VERSION_STRING ${PC_TOLUA++_VERSION})
 elseif(TOLUA++_INCLUDE_DIR AND EXISTS "${TOLUA++_INCLUDE_DIR}/tolua++.h")
-    file(STRINGS "${TOLUA++_INCLUDE_DIR}/tolua.h" tolua_version_str
+    file(STRINGS "${TOLUA++_INCLUDE_DIR}/tolua++.h" tolua_version_str
          REGEX "^#define[\t ]+TOLUA_VERSION[\t ]+\".*\"")
 
     string(REGEX REPLACE "^#define[\t ]+TOLUA_VERSION[\t ]+\"tolua[^0-9]*([^\"]*)\".*" "\\1"
