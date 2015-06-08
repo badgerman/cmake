@@ -34,11 +34,7 @@
 # Always search for non-versioned lua first (recommended)
 SET(_POSSIBLE_LUA_INCLUDE include include/lua)
 SET(_POSSIBLE_LUA_EXECUTABLE lua)
-SET(_POSSIBLE_TOLUA_EXECUTABLE tolua)
-SET(_POSSIBLE_TOLUA++_EXECUTABLE tolua++)
 SET(_POSSIBLE_LUA_LIBRARY lua)
-SET(_POSSIBLE_TOLUA_LIBRARY tolua)
-SET(_POSSIBLE_TOLUA++_LIBRARY tolua++)
 
 # Determine possible naming suffixes (there is no standard for this)
 IF(Lua_FIND_VERSION_MAJOR AND Lua_FIND_VERSION_MINOR)
@@ -52,53 +48,15 @@ FOREACH(_SUFFIX ${_POSSIBLE_SUFFIXES})
   LIST(APPEND _POSSIBLE_LUA_INCLUDE "include/lua${_SUFFIX}")
   LIST(APPEND _POSSIBLE_LUA_EXECUTABLE "lua${_SUFFIX}")
   LIST(APPEND _POSSIBLE_LUA_LIBRARY "lua${_SUFFIX}")
-  LIST(APPEND _POSSIBLE_TOLUA_EXECUTABLE "tolua${_SUFFIX}")
-  LIST(APPEND _POSSIBLE_TOLUA_LIBRARY "tolua${_SUFFIX}")
-  LIST(APPEND _POSSIBLE_TOLUA++_EXECUTABLE "tolua++${_SUFFIX}")
-  LIST(APPEND _POSSIBLE_TOLUA++_LIBRARY "tolua++${_SUFFIX}")
 ENDFOREACH(_SUFFIX)
 
 # Find the lua executable
 FIND_PROGRAM(LUA_EXECUTABLE
   NAMES ${_POSSIBLE_LUA_EXECUTABLE}
 )
-FIND_PROGRAM(TOLUA_EXECUTABLE
-  NAMES ${_POSSIBLE_TOLUA_EXECUTABLE}
-)
-FIND_PROGRAM(TOLUA++_EXECUTABLE
-  NAMES ${_POSSIBLE_TOLUA++_EXECUTABLE}
-)
 
 # Find the lua header
 FIND_PATH(LUA_INCLUDE_DIR lua.h
-  HINTS
-  $ENV{LUA_DIR}
-  PATH_SUFFIXES ${_POSSIBLE_LUA_INCLUDE}
-  PATHS
-  ~/Library/Frameworks
-  /Library/Frameworks
-  /usr/local
-  /usr
-  /sw # Fink
-  /opt/local # DarwinPorts
-  /opt/csw # Blastwave
-  /opt
-)
-FIND_PATH(TOLUA_INCLUDE_DIR tolua.h
-  HINTS
-  $ENV{LUA_DIR}
-  PATH_SUFFIXES ${_POSSIBLE_LUA_INCLUDE}
-  PATHS
-  ~/Library/Frameworks
-  /Library/Frameworks
-  /usr/local
-  /usr
-  /sw # Fink
-  /opt/local # DarwinPorts
-  /opt/csw # Blastwave
-  /opt
-)
-FIND_PATH(TOLUA++_INCLUDE_DIR tolua++.h
   HINTS
   $ENV{LUA_DIR}
   PATH_SUFFIXES ${_POSSIBLE_LUA_INCLUDE}
@@ -129,37 +87,6 @@ FIND_LIBRARY(LUA_LIBRARY
   /opt/csw
   /opt
 )
-FIND_LIBRARY(TOLUA_LIBRARY
-  NAMES ${_POSSIBLE_TOLUA_LIBRARY}
-  HINTS
-  $ENV{LUA_DIR}
-  PATH_SUFFIXES lib64 lib
-  PATHS
-  ~/Library/Frameworks
-  /Library/Frameworks
-  /usr/local
-  /usr
-  /sw
-  /opt/local
-  /opt/csw
-  /opt
-)
-FIND_LIBRARY(TOLUA++_LIBRARY
-  NAMES ${_POSSIBLE_TOLUA++_LIBRARY}
-  HINTS
-  $ENV{LUA_DIR}
-  PATH_SUFFIXES lib64 lib
-  PATHS
-  ~/Library/Frameworks
-  /Library/Frameworks
-  /usr/local
-  /usr
-  /sw
-  /opt/local
-  /opt/csw
-  /opt
-)
-
 
 
 IF(LUA_LIBRARY)
@@ -187,11 +114,8 @@ INCLUDE(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(Lua
                                   REQUIRED_VARS LUA_LIBRARIES LUA_INCLUDE_DIR
                                   VERSION_VAR LUA_VERSION_STRING)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(TOLUA++
-                                  REQUIRED_VARS TOLUA++_LIBRARY TOLUA++_INCLUDE_DIR
-                                  VERSION_VAR TOLUA++_VERSION_STRING)
 
-MARK_AS_ADVANCED(LUA_INCLUDE_DIR TOLUA_INCLUDE_DIR TOLUA++_INCLUDE_DIR
-LUA_LIBRARIES LUA_LIBRARY TOLUA_LIBRARY TOLUA++_LIBRARY
-LUA_MATH_LIBRARY LUA_EXECUTABLE TOLUA_EXECUTABLE TOLUA++_EXECUTABLE)
-
+MARK_AS_ADVANCED(LUA_INCLUDE_DIR 
+LUA_LIBRARIES LUA_LIBRARY
+LUA_MATH_LIBRARY LUA_EXECUTABLE
+)
