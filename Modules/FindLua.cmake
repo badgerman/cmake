@@ -90,7 +90,6 @@ FIND_LIBRARY(LUA_LIBRARY
   /opt
 )
 
-
 IF(LUA_LIBRARY)
   # include the math library for Unix
   IF(UNIX AND NOT APPLE)

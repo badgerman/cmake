@@ -30,11 +30,13 @@ set(TOLUA_DEFINITIONS ${PC_TOLUA_CFLAGS_OTHER})
 
 find_path(TOLUA_INCLUDE_DIR NAMES tolua.h
    HINTS
+   tolua
    ${PC_TOLUA_INCLUDEDIR}
    ${PC_TOLUA_INCLUDE_DIRS}
    )
 find_library(TOLUA_LIBRARY NAMES tolua
    HINTS
+   tolua
    ${PC_TOLUA_LIBDIR}
    ${PC_TOLUA_LIBRARY_DIRS}
    )
